@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade - Dimensional Cortex</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            font-size: 1.2em;
+            margin-bottom: 60px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .tier-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .tier-card.featured {
+            border: 2px solid #667eea;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .tier-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .tier-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tier-price {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .tier-price span {
+            font-size: 0.4em;
+            color: #a0a0a0;
+        }
+
+        .tier-description {
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+        }
+
+        .features li::before {
+            content: '✓';
+            color: #10a37f;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .cta-button {
+            width: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button:active {
+            transform: scale(0.98);
+        }
+
+        .cta-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            margin-top: 60px;
+        }
+
+        .comparison-table h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .check { color: #10a37f; font-size: 1.3em; }
+        .cross { color: #ef4444; font-size: 1.3em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Upgrade Your Continuity</h1>
+        <p class="subtitle">Choose the tier that fits your AI workflow</p>
+
+        <div class="pricing-grid">
+            <!-- FREE TIER -->
+            <div class="tier-card">
+                <div class="tier-name">Free</div>
+                <div class="tier-price">$0<span>/month</span></div>
+                <div class="tier-description">Perfect for trying out dimensional continuity</div>
+                <ul class="features">
+                    <li>1,000 conversations</li>
+                    <li>100 active crystals</li>
+                    <li>Single platform</li>
+                    <li>Dashboard access</li>
+                    <li>Local storage</li>
+                </ul>
+                <button class="cta-button secondary" onclick="selectTier('free')">Current Tier</button>
+            </div>
+
+            <!-- PRO TIER -->
+            <div class="tier-card featured">
+                <div class="tier-name">Pro</div>
+                <div class="tier-price">$9.99<span>/month</span></div>
+                <div class="tier-description">For power users who want full continuity</div>
+                <ul class="features">
+                    <li>10,000 conversations</li>
+                    <li>1,000 active crystals</li>
+                    <li>All 3 platforms</li>
+                    <li>Cross-platform insights</li>
+                    <li>QUASI evolution</li>
+                    <li>Energy visualization</li>
+                    <li>Priority support</li>
+                </ul>
+                <button class="cta-button" onclick="selectTier('pro')">Upgrade to Pro</button>
+            </div>
+
+            <!-- LIFETIME TIER -->
+            <div class="tier-card">
+                <div class="tier-name">Lifetime</div>
+                <div class="tier-price">$299<span>one-time</span></div>
+                <div class="tier-description">Pay once, own forever (limited to 500 users)</div>
+                <ul class="features">
+                    <li>Everything in Pro</li>
+                    <li>Lifetime updates</li>
+                    <li>Founding member badge</li>
+                    <li>Early feature access</li>
+                    <li>Direct dev feedback</li>
+                </ul>
+                <button class="cta-button" onclick="selectTier('lifetime')">Get Lifetime Access</button>
+            </div>
+        </div>
+
+        <div class="comparison-table">
+            <h2>📊 Feature Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Free</th>
+                        <th>Pro</th>
+                        <th>Lifetime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Conversations</td>
+                        <td>1,000</td>
+                        <td>10,000</td>
+                        <td>10,000</td>
+                    </tr>
+                    <tr>
+                        <td>All AI Platforms</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>QUASI Evolution</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Cross-Platform Insights</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Priority Support</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Founding Member Badge</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function selectTier(tier) {
+            if (tier === 'free') {
+                alert('You are already on the Free tier!');
+                return;
+            }
+
+            // TODO: Integrate with Stripe/Gumroad
+            // For now, just redirect to payment page
+            const paymentUrls = {
+                'pro': 'https://buy.stripe.com/YOUR_PRO_LINK',  // Replace with real Stripe link
+                'lifetime': 'https://buy.stripe.com/YOUR_LIFETIME_LINK'  // Replace with real Stripe link
+            };
+
+            // Temporary: Open alert
+            alert(`Upgrading to ${tier.toUpperCase()} tier!\n\nPayment integration coming soon.\n\nFor now, contact: your-email@example.com`);
+
+            // Later: window.location.href = paymentUrls[tier];
+        }
+    </script>
+</body>
+</html>
