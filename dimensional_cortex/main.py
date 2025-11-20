@@ -4,6 +4,26 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import get_color_from_hex
 from kivy.properties import StringProperty
+from kivy.clock import Clock
+from kivy.utils import platform
+
+# Import new Android modules (will only work on Android, so wrap in try/except or check platform)
+try:
+    if platform == 'android':
+        from backend.UDACPermissionOrchestrator import orchestrator
+        from backend.UDACLocalBridge import bridge
+        from backend.UDACOverlayController import controller
+        from backend.UDACSessionManager import session_manager
+
+        # We can import the engine here or let the bridge handle it
+        # For now, let's assume the bridge needs to be wired up
+        from desktop.cortex_server import TrinitySystem
+except ImportError:
+    orchestrator = None
+    bridge = None
+    controller = None
+    session_manager = None
+    TrinitySystem = None
 
 class ScreenBase(Screen):
     title = StringProperty('')
@@ -30,6 +50,35 @@ class UDACApp(App):
         sm.add_widget(AboutScreen(name="about"))
         sm.current = "onboarding"
         return sm
+
+    def on_start(self):
+        if platform == 'android':
+            self.init_android_components()
+
+    def init_android_components(self):
+        # 1. Check Permissions
+        if orchestrator:
+            orchestrator.request_overlay_permission()
+            orchestrator.request_accessibility_permission()
+
+        # 2. Initialize Trinity Engine
+        if TrinitySystem:
+            self.trinity = TrinitySystem()
+
+            # 3. Connect Bridge
+            if bridge:
+                bridge.initialize_engine(self.trinity)
+                bridge.start_listening()
+
+        # 4. Show Overlay (optional on start)
+        if controller:
+            controller.show_overlay()
+
+    def on_stop(self):
+        if hasattr(self, 'trinity'):
+            self.trinity.shutdown()
+        if controller:
+            controller.hide_overlay()
 
 if __name__ == "__main__":
     UDACApp().run()
