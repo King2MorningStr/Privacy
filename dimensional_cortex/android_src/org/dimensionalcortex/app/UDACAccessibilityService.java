@@ -17,12 +17,12 @@ public class UDACAccessibilityService extends AccessibilityService {
     public static final String EXTRA_PACKAGE_NAME = "package_name";
     public static final String EXTRA_CLASS_NAME = "class_name";
     public static final String EXTRA_TEXT = "text";
+    public static final String EXTRA_IS_EDITABLE = "is_editable";
     public static final String EXTRA_CONTENT_DESCRIPTION = "content_description";
 
     @Override
     public void onServiceConnected() {
         Log.i(TAG, "Service connected");
-        // Service info is configured via xml/udac_accessibility_config.xml
     }
 
     @Override
@@ -41,6 +41,17 @@ public class UDACAccessibilityService extends AccessibilityService {
             if (event.getClassName() != null) {
                 intent.putExtra(EXTRA_CLASS_NAME, event.getClassName().toString());
             }
+
+            // Check if source is editable
+            boolean isEditable = false;
+            AccessibilityNodeInfo source = event.getSource();
+            if (source != null) {
+                isEditable = source.isEditable();
+                // Don't recycle immediately if we were to use it more,
+                // but here we just check one property.
+                // source.recycle(); // Good practice to recycle, but handled by GC usually in simple cases.
+            }
+            intent.putExtra(EXTRA_IS_EDITABLE, isEditable);
 
             // Extract text content
             List<CharSequence> textList = event.getText();

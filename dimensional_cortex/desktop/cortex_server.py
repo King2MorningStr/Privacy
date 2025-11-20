@@ -14,17 +14,19 @@ from typing import Any, Dict
 # Add project modules to path if needed
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from ..backend.dimensional_memory_constant_standalone_demo import (
+# Import backend modules directly as they are in the Python path
+from backend.dimensional_memory_constant_standalone_demo import (
     start_memory_system,
     stop_memory_system,
     EvolutionaryGovernanceEngine,
     DimensionalMemory
 )
-from ..backend.dimensional_processing_system_standalone_demo import (
+from backend.dimensional_processing_system_standalone_demo import (
     CrystalMemorySystem,
     GovernanceEngine
 )
-from ..backend.dimensional_energy_regulator import DimensionalEnergyRegulator
+from backend.dimensional_energy_regulator import DimensionalEnergyRegulator
+from backend.dimensional_conversation_engine import DimensionalConversationEngine
 
 # ============================================================================
 # GLOBAL TRINITY SYSTEM INITIALIZATION
@@ -46,6 +48,13 @@ class TrinitySystem:
         
         # Initialize LawSet
         self._init_lawset()
+
+        # Initialize Dimensional Conversation Engine
+        self.dce = DimensionalConversationEngine(
+            processing_system=self.crystal_system,
+            energy_regulator=self.energy_regulator,
+            memory_governor=self.memory_governor
+        )
         
         print("[CORTEX] Trinity Online. Ready for direct function calls.")
 
@@ -105,9 +114,24 @@ class TrinitySystem:
         # Register the new LawSet
         self.memory_governor.law_sets["AI_CHAT"] = OpenAIChatLawSet()
 
+    def handle_interaction(self, text: str) -> str:
+        """
+        Main entry point for UDAC text interaction.
+        Delegates to the Dimensional Conversation Engine.
+        """
+        if not self.dce:
+            return "Error: Engine not initialized."
+
+        try:
+            response = self.dce.handle_interaction(text)
+            return response
+        except Exception as e:
+            print(f"[ERROR] Interaction failed: {e}")
+            return "I am having trouble processing that."
+
     def process_interaction(self, data: Dict[str, Any]):
         """
-        Replaces /ingest endpoint.
+        Legacy /ingest endpoint replacement for full data objects.
         """
         try:
             # === TIER CHECKING ===
@@ -184,7 +208,7 @@ class TrinitySystem:
                 "crystal_level": crystal.level.name,
                 "energy_presence": round(presence, 3)
             }
-            
+
         except Exception as e:
             print(f"[ERROR] Ingestion failed: {e}")
             return {"status": "error", "message": str(e)}

@@ -7,8 +7,17 @@ from kivy.clock import Clock
 import json
 import threading
 
-# Import the engine
-from .dimensional_conversation_engine import DimensionalConversationEngine
+# Import the engine and components
+# Note: Since we are running from main.py, backend is a top-level package in dimensional_cortex
+try:
+    from backend.dimensional_conversation_engine import DimensionalConversationEngine
+    from backend.UDACOverlayController import controller as overlay_controller
+    from backend.ContinuityTagger import tagger
+except ImportError:
+    # Fallback if running in a different context
+    from ..backend.dimensional_conversation_engine import DimensionalConversationEngine
+    from ..backend.UDACOverlayController import controller as overlay_controller
+    from ..backend.ContinuityTagger import tagger
 
 class UDACLocalBridge:
     def __init__(self):
@@ -49,9 +58,10 @@ class UDACLocalBridge:
                         pkg = intent.getStringExtra("package_name")
                         text = intent.getStringExtra("text")
                         event_type = intent.getIntExtra("event_type", 0)
+                        is_editable = intent.getBooleanExtra("is_editable", False)
 
                         if text:
-                            self.callback(pkg, text, event_type)
+                            self.callback(pkg, text, event_type, is_editable)
                 except Exception as e:
                     Logger.error(f"UDAC: Error in onReceive: {e}")
 
@@ -64,21 +74,29 @@ class UDACLocalBridge:
         activity.registerReceiver(self.callback_wrapper, intent_filter)
         self.is_listening = True
 
-    def handle_event(self, package_name, text, event_type):
-        Logger.info(f"UDAC: Received event from {package_name}: {text[:50]}...")
+    def handle_event(self, package_name, text, event_type, is_editable):
+        Logger.info(f"UDAC: Received event from {package_name} (Editable: {is_editable}): {text[:50]}...")
 
         if not text:
             return
 
         if self.engine:
             # Run in a separate thread to not block UI
-            threading.Thread(target=self._process_in_engine, args=(text,)).start()
+            threading.Thread(target=self._process_in_engine, args=(text, is_editable)).start()
 
-    def _process_in_engine(self, text):
+    def _process_in_engine(self, text, is_editable):
         try:
+            # 1. Process with Engine
             response = self.engine.handle_interaction(text)
             Logger.info(f"UDAC: Engine response: {response[:50]}...")
-            # Here we would send the response back to OverlayController to display
+
+            # 2. Tag/Format Response
+            tagged_data = tagger.apply(response, {"is_editable": is_editable})
+
+            # 3. Update Overlay
+            if tagged_data and overlay_controller:
+                overlay_controller.update_text(tagged_data["display_text"])
+
         except Exception as e:
             Logger.error(f"UDAC: Engine error: {e}")
 
