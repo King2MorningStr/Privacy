@@ -23,7 +23,7 @@ jobs:
           sudo apt update
           sudo apt install -y zip unzip build-essential python3-pip \
             libffi-dev libssl-dev liblzma-dev zlib1g-dev libjpeg-dev \
-            libfreetype6-dev
+            libfreetype6-dev Aidl
 
       - name: Install Buildozer + p4a
         run: |
