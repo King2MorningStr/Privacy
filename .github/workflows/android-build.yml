@@ -18,23 +18,49 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install required system dependencies
         run: |
           sudo apt update
-          sudo apt install -y zip unzip build-essential python3-pip \
-            libffi-dev libssl-dev liblzma-dev zlib1g-dev libjpeg-dev \
-            libfreetype6-dev Aidl
+          sudo apt install -y \
+            zip unzip openjdk-17-jdk \
+            build-essential git python3-pip \
+            libffi-dev libssl-dev liblzma-dev zlib1g-dev \
+            libjpeg-dev libfreetype6-dev
 
-      - name: Install Buildozer + p4a
+      - name: Install Buildozer + P4A
         run: |
           pip install --upgrade pip cython
           pip install buildozer python-for-android
 
-      - name: Initialize buildozer (non-destructive)
+      - name: Install Android SDK + Build Tools manually
         run: |
-          buildozer init || true
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk.zip
+          unzip sdk.zip
+          rm sdk.zip
+
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/33.0.0" >> $GITHUB_ENV
+
+          yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.0" \
+            "build-tools;30.0.3" \
+            "extras;android;m2repository" \
+            "extras;google;m2repository"
 
       - name: Build APK (debug)
+        run: |
+          buildozer -v android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: udac-debug-apk
+          path: bin/*.apk      - name: Build APK (debug)
         run: |
           buildozer -v android debug
 
