@@ -60,14 +60,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: udac-debug-apk
-          path: bin/*.apk      - name: Build APK (debug)
+          path: bin/*.apk
         run: |
           buildozer -v android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: udac-debug-apk
+          name: Build APK (debug)
           path: bin/*.apk
       - name: Build APK (debug)
         run: |
