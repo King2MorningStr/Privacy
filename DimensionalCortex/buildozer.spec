@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,kv,txt,enc,png,jpg,gif,json,xml
 version = 1.0.0
 # Removed Spacy to avoid build complexity (using lite engine)
-requirements = python3,kivy,cryptography,numpy,networkx
+requirements = python3,kivy
 
 orientation = portrait
 fullscreen = 0
