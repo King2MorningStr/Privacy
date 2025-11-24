@@ -48,7 +48,7 @@ jobs:
         pip3 install --upgrade buildozer
     
     - name: Build with buildozer
-      run: |
+      run:
         buildozer android debug
     
     - name: Upload APK artifact
