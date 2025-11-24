@@ -60,31 +60,33 @@ class DataNode:
         It updates the node and pushes it to the save queue.
         """
         modified = False
-
+        
         if payload_update:
             for key, value in payload_update.items():
                 if self.payload.get(key) != value:
                     self.payload[key] = value
                     modified = True
-
+            
         if link_update:
             for link in link_update:
                 if link not in self.dimension_links:
                     self.dimension_links.append(link)
                     modified = True
-
+        
+        # AFTER
         if modified:
-            logging.info(f"Modifying Node {self.id}...")
+            logging.debug(f"Modifying Node {self.id}...")
             self.last_modified_timestamp = time.time()
             SAVE_QUEUE.put(self)
-            logging.info(f"Node {self.id} queued for live save.")
+            logging.debug(f"Node {self.id} queued for live save.")
+
 
     def to_dict(self):
         return {
             "id": self.id, "dimension_links": self.dimension_links,
             "payload": self.payload, "last_modified_timestamp": self.last_modified_timestamp
         }
-
+    
     @staticmethod
     def from_dict(data: Dict):
         return DataNode(
@@ -150,10 +152,10 @@ class DimensionalMemory:
         node.modify(payload_update, link_update)
         if link_update or (payload_update and "concept" in payload_update):
             self._update_indices(node)
-
+    
     def get_node(self, node_id: str) -> Optional[DataNode]:
         return self.nodes.get(node_id)
-
+        
     def find_node_id_by_concept(self, concept_name: str) -> Optional[str]:
         return self.concept_index.get(concept_name)
 
@@ -169,10 +171,10 @@ class SecurityLawSet:
         self.name = "SECURITY"
         self.fingerprint_keys = {"ip", "action", "threat_level", "vector_complexity"}
         logging.info("Security Law Set initialized.")
-
+        
     def analyze_data(self, data: dict, parent_law: Optional[Any] = None) -> dict:
         logging.info(f"SECURITY LAWSET: Analyzing {data.get('ip')}...")
-
+        
         # 1. Standard "SecurityLaw" logic
         concept_name = f"IP_{data.get('ip')}"
         dimensions = ["dim_theme:security"]
@@ -203,17 +205,17 @@ class ClimateLawSet:
         self.name = "CLIMATE"
         self.fingerprint_keys = {"sensor_id", "temp", "anomaly", "temp_delta"}
         logging.info("Climate Law Set initialized.")
-
+        
     def analyze_data(self, data: dict, parent_law: Optional[Any] = None) -> dict:
         logging.info(f"CLIMATE LAWSET: Analyzing {data.get('sensor_id')}...")
-
+        
         # 1. Standard "ClimateLaw" logic
         concept_name = f"SENSOR_{data.get('sensor_id')}"
         dimensions = ["dim_theme:climate"]
         anomaly = data.get("anomaly", "none")
         if anomaly == "high": dimensions.append("dim_anomaly:high")
         payload_update = { "last_temp": data.get("temp"), "last_anomaly": anomaly }
-
+        
         # --- PERFECTION: "Inherited Governance" (Mutation) Logic ---
         if parent_law:
             dimensions.append(f"dim_mutator:{parent_law.name}")
@@ -222,7 +224,7 @@ class ClimateLawSet:
                     "json_leaf_data": payload_update,
                     "structural_role": "climate_content"
                 }
-
+                
         return {
             "concept_name": concept_name, "new_dimensions": dimensions,
             "payload_update": payload_update
@@ -234,17 +236,17 @@ class TextLawSet:
         self.name = "TEXT"
         self.fingerprint_keys = {"text", "source_doc"}
         logging.info("Text Law Set initialized.")
-
+        
     def analyze_data(self, data: dict, parent_law: Optional[Any] = None) -> dict:
         text = data.get("text", "")
         logging.info(f"TEXT LAWSET: Analyzing '{text[:20]}...'")
-
+        
         # 1. Standard logic
         sentiment = "positive" if "on track" in text else "negative" if "failed" in text else "neutral"
         concept_name = f"TXT_{uuid.uuid4().hex[:6]}"
         dimensions = ["dim_theme:text", f"dim_sentiment:{sentiment}"]
         payload_update = { "raw_text": text, "char_count": len(text) }
-
+        
         # --- PERFECTION: "Inherited Governance" (Mutation) Logic ---
         if parent_law:
             dimensions.append(f"dim_mutator:{parent_law.name}")
@@ -336,7 +338,7 @@ class LawGenerator:
         """Step 2: Compare fingerprints to find the closest known LawSet."""
         best_match = None
         highest_score = 0.0
-
+        
         for domain, law_set in self.known_law_sets.items():
             if not hasattr(law_set, 'fingerprint_keys'):
                 continue
@@ -344,11 +346,11 @@ class LawGenerator:
             intersection = data_fingerprint.intersection(known_keys)
             union = data_fingerprint.union(known_keys)
             score = len(intersection) / len(union) if union else 0
-
+            
             if score > highest_score and score > 0.2:
                 highest_score = score
                 best_match = (domain, law_set)
-
+                
         if best_match:
             logging.info(f"LAW GENERATOR: Closest match is '{best_match[0]}' (Score: {highest_score:.2f}).")
         else:
@@ -361,7 +363,7 @@ class LawGenerator:
         the logic from the base law set.
         """
         logging.info(f"LAW GENERATOR: Adapting laws from '{base_law_set.name}'...")
-
+        
         data_keys = list(data.keys())
         # --- PERFECTION: Smarter concept naming ---
         concept_key_options = ["id", "concept", "name", "filepath", "ip"]
@@ -371,18 +373,18 @@ class LawGenerator:
                 concept_key = key
                 break
         new_theme = f"dyn_{concept_key}"
-
+        
         # --- PERFECTION: Generated function must *also* accept parent_law ---
         def new_analyze_func(data_dict: dict, parent_law: Optional[Any] = None) -> dict:
             logging.info(f"DYNAMIC LAWSET ({new_theme}): Analyzing {data_dict.get(concept_key)}...")
-
+            
             concept_name = f"DYN_{data_dict.get(concept_key)}"
             dimensions = [
                 f"dim_theme:{new_theme}",
                 f"dim_adapted_from:{base_law_set.name}"
             ]
             payload_update = data_dict # Save the whole payload
-
+            
             # --- PERFECTION: The generated law also obeys mutation ---
             if parent_law:
                 dimensions.append(f"dim_mutator:{parent_law.name}")
@@ -397,7 +399,7 @@ class LawGenerator:
                 "new_dimensions": dimensions,
                 "payload_update": payload_update
             }
-
+            
         return new_analyze_func
 
     def generate_new_law(self, unknown_data: dict) -> Optional[Tuple[str, Any]]:
@@ -411,7 +413,7 @@ class LawGenerator:
         try:
             new_analyze_function = self._adapt_law(unknown_data, base_law)
             new_domain_name = f"DYN_{list(data_fingerprint)[0].upper()}"
-
+            
             # --- PERFECTION: Dynamically created class must match new interface ---
             NewLawSetClass = type(
                 f"Dynamic{new_domain_name}LawSet",
@@ -424,10 +426,10 @@ class LawGenerator:
                     "__init__": lambda self: setattr(self, 'name', new_domain_name)
                 }
             )
-
+            
             logging.info(f"LAW GENERATOR: Successfully generated new class '{NewLawSetClass.name}'.")
             return new_domain_name, NewLawSetClass()
-
+            
         except Exception as e:
             logging.error(f"LAW GENERATOR: Failed to adapt law. Error: {e}")
             return None, None
@@ -437,11 +439,11 @@ class EvolutionaryGovernanceEngine:
     """
     The "Conscious Mind." Now fully recursive and generational.
     """
-
+    
     def __init__(self, memory_system: DimensionalMemory):
         self.memory = memory_system
         self.assessment_log = []
-
+        
         # Load all "known" Law Set plug-ins
         self.law_sets: Dict[str, Any] = {
             "SECURITY": SecurityLawSet(),
@@ -453,7 +455,7 @@ class EvolutionaryGovernanceEngine:
             "AUDIO": AudioLawSet(),
             "BINARY": BinaryLawSet()
         }
-
+        
         self.law_generator = LawGenerator(self.law_sets)
         logging.info(f"Evolutionary Governor Online. Loaded {len(self.law_sets)} static Law Sets.")
 
@@ -464,7 +466,7 @@ class EvolutionaryGovernanceEngine:
             if hasattr(law_set, 'fingerprint_keys'):
                 if data_fingerprint.issuperset(law_set.fingerprint_keys):
                     return domain
-
+        
         logging.warning(f"DOMAIN ID: Could not identify domain for {data_fingerprint}")
         return "UNKNOWN"
 
@@ -476,7 +478,7 @@ class EvolutionaryGovernanceEngine:
         deeper_items = []
         if not isinstance(data, dict):
             return []
-
+            
         for key, value in data.items():
             if isinstance(value, dict):
                 deeper_items.append(value)
@@ -493,12 +495,12 @@ class EvolutionaryGovernanceEngine:
         """
         # 1. Identify Domain
         domain = self._identify_domain(data)
-
+            
         # 2. Handle "UNKNOWN" domain
         if domain == "UNKNOWN":
             logging.info(f"GOVERNOR: Unknown data type. Engaging Law Generator...")
             new_domain, new_law_class = self.law_generator.generate_new_law(data)
-
+            
             if new_domain and new_law_class:
                 logging.info(f"GOVERNOR: New Law Set '{new_domain}' generated! Adding to library.")
                 self.law_sets[new_domain] = new_law_class
@@ -506,16 +508,16 @@ class EvolutionaryGovernanceEngine:
             else:
                 logging.error(f"GOVERNOR: Law Generator failed. Discarding: {data}")
                 return
-
+            
         # 3. Apply domain-specific laws (with "mutation")
         law_set = self.law_sets.get(domain)
         try:
             # --- PERFECTION: Pass the parent_law_object for mutation ---
             node_rules = law_set.analyze_data(data, parent_law_object)
-
+            
             # --- PERFECTION: Pass the parent_node for linking ---
             node_obj = self._auto_write_node(node_rules, parent_node)
-
+            
             self.assess_law_application(domain, node_rules, node_obj)
 
             # --- PERFECTION: The "Generational" Recursive Call ---
@@ -526,11 +528,11 @@ class EvolutionaryGovernanceEngine:
                     for item in deeper_data_items:
                         # This is the "Generational" call
                         self.ingest_data(
-                            item,
-                            parent_node=node_obj,
+                            item, 
+                            parent_node=node_obj, 
                             parent_law_object=law_set
                         )
-
+            
         except Exception as e:
             logging.critical(f"GOVERNOR: Law Set '{domain}' failed! Error: {e}", exc_info=True)
 
@@ -555,7 +557,7 @@ class EvolutionaryGovernanceEngine:
             base_payload = {"concept": concept}
             if rules.get('payload_update'):
                 base_payload.update(rules['payload_update'])
-
+            
             new_node = DataNode(
                 dimension_links=rules.get('new_dimensions', []),
                 payload=base_payload
@@ -563,7 +565,7 @@ class EvolutionaryGovernanceEngine:
             # Add to memory (this also triggers the first save)
             self.memory.add_node(new_node)
             node_to_return = new_node
-
+        
         # --- PERFECTION: "Two-Way Street" Generational Linking ---
         if parent_node and node_to_return:
             # 1. Link Child to Parent
@@ -599,7 +601,8 @@ def continuous_save_thread():
             with open(DELTA_LOG_FILE, 'a') as f:
                 f.write(log_entry + '\n')
             SAVE_QUEUE.task_done()
-            logging.info(f"SAVETHREAD: Node {node_to_save.id} written to log.")
+            logging.debug(f"SAVETHREAD: Node {node_to_save.id} written to log.")
+
         except queue.Empty:
             continue
         except Exception as e:
@@ -608,12 +611,12 @@ def continuous_save_thread():
 
 def background_merge():
     """Periodically merges the delta log into the base state file."""
-    logging.info("Merge Thread started.")
+    logging.debug("Merge Thread started.")
     while _merge_thread_active.wait(MERGE_INTERVAL_SECONDS):
         if not _merge_thread_active.is_set(): break
-        logging.info("MERGETHREAD: Merge process triggered...")
+        logging.debug("MERGETHREAD: Merge process triggered...")
         if not os.path.exists(DELTA_LOG_FILE):
-            logging.info("MERGETHREAD: No delta log found. Merge skipped.")
+            logging.debug("MERGETHREAD: No delta log found. Merge skipped.")
             continue
         try:
             temp_log_file = DELTA_LOG_FILE + ".merging"
@@ -627,7 +630,7 @@ def background_merge():
                     base_data = json.load(f)
                     current_state_nodes = base_data.get('nodes', {})
                     base_timestamp = base_data.get('last_global_save_timestamp', 0.0)
-
+            
             latest_timestamp = base_timestamp
             with open(temp_log_file, 'r') as f:
                 for line in f:
@@ -638,13 +641,13 @@ def background_merge():
                             latest_timestamp = node_data['last_modified_timestamp']
                     except json.JSONDecodeError:
                         logging.warning(f"MERGETHREAD: Skipping corrupt line: {line}")
-
+            
             merged_data = {
                 "last_global_save_timestamp": latest_timestamp, "nodes": current_state_nodes
             }
             with open(TEMP_SAVE_FILE, 'w') as f:
                 json.dump(merged_data, f, indent=2)
-
+            
             os.replace(TEMP_SAVE_FILE, BASE_SAVE_FILE)
             os.remove(temp_log_file)
             logging.info(f"MERGETHREAD: Merge complete. {len(current_state_nodes)} nodes in new base state.")
@@ -693,14 +696,14 @@ def stop_memory_system(save_thread: threading.Thread, merge_thread: threading.Th
 
 # --- PERFECTION: New Test Harness for "Generational" Logic ---
 if __name__ == "__main__":
-
+    
     # Clean up old files for a fresh demo
     if os.path.exists(BASE_SAVE_FILE): os.remove(BASE_SAVE_FILE)
     if os.path.exists(DELTA_LOG_FILE): os.remove(DELTA_LOG_FILE)
-
+    
     # 1. Start the system
     governor, memory_system, save_t, merge_t = start_memory_system()
-
+    
     # 2. Define a "multimodal" data object (JSON + Security + Text)
     # This is the "Generational" test.
     complex_crystal_data = {
@@ -708,29 +711,29 @@ if __name__ == "__main__":
         "json_data": { "status": "processed", "level": "QUASI" },
         "facets": [
             {
-                "ip": "192.168.1.10",
-                "action": "port_scan",
+                "ip": "192.168.1.10", 
+                "action": "port_scan", 
                 "threat_level": 0.7,
                 "vector_complexity": 0.6
             },
             {
-                "text": "Port scan correlated with brute force attempt",
+                "text": "Port scan correlated with brute force attempt", 
                 "source_doc": "alert.log"
             }
         ]
     }
-
+    
     # 3. Ingest the *single* complex object
     logging.info("\n--- INGESTING MULTIMODAL (GENERATIONAL) DATA ---")
     governor.ingest_data(complex_crystal_data)
-
+    
     # 4. Let the system run to allow threads to save and link
     logging.info("\n--- Main thread sleeping for 5 seconds... ---\n")
     time.sleep(5)
-
+    
     # 5. Shut down
     stop_memory_system(save_t, merge_t)
-
+    
     # 6. Final "Perfection" Check
     print("\n" + "="*40)
     print("--- FINAL STATE VERIFICATION ---")
@@ -743,26 +746,26 @@ if __name__ == "__main__":
         assert parent_id, "Parent node was not created."
         parent_node = memory_system.get_node(parent_id)
         print(f"  ✅ Found Parent Node: {parent_node.payload.get('concept')}")
-
+        
         child_links = [l for l in parent_node.dimension_links if l.startswith('dim_child_link:')]
         assert len(child_links) == 2, f"Parent node should have 2 child links, found {len(child_links)}"
         print(f"  ✅ Found {len(child_links)} 'dim_child_link' entries.")
-
+        
         # --- Check 2: The Security "Child" Node ---
         print("\nChecking 2: Child Node (Security Law)")
         child_sec_id = memory_system.find_node_id_by_concept("IP_192.168.1.10")
         assert child_sec_id, "Security child node was not created."
         child_sec_node = memory_system.get_node(child_sec_id)
         print(f"  ✅ Found Security Child: {child_sec_node.payload.get('concept')}")
-
+        
         # Check Parent Link
         assert f"dim_parent_link:{parent_id}" in child_sec_node.dimension_links, "Child missing parent link."
         print("  ✅ 'dim_parent_link' is correct.")
-
+        
         # Check Mutation
         assert "dim_mutator:JSON" in child_sec_node.dimension_links, "Child missing mutation link."
         print("  ✅ 'dim_mutator:JSON' is present.")
-
+        
         # Check Mutated Payload
         assert "json_leaf_data" in child_sec_node.payload, "Payload was not mutated."
         print("  ✅ Payload was correctly mutated (has 'json_leaf_data').")
@@ -774,19 +777,19 @@ if __name__ == "__main__":
         assert child_txt_id, "Text child node was not created."
         child_txt_node = memory_system.get_node(child_txt_id)
         print(f"  ✅ Found Text Child: {child_txt_node.payload.get('concept')}")
-
+        
         # Check Parent Link
         assert f"dim_parent_link:{parent_id}" in child_txt_node.dimension_links, "Child missing parent link."
         print("  ✅ 'dim_parent_link' is correct.")
-
+        
         # Check Mutation
         assert "dim_mutator:JSON" in child_txt_node.dimension_links, "Child missing mutation link."
         print("  ✅ 'dim_mutator:JSON' is present.")
-
+        
         # Check Mutated Payload
         assert "json_leaf_data" in child_txt_node.payload, "Payload was not mutated."
         print("  ✅ Payload was correctly mutated (has 'json_leaf_data').")
-
+        
         print("\n" + "="*40)
         print("  🎉🎉🎉 PERFECTION COMPLETE 🎉🎉🎉")
         print("  Generational linking & mutation logic is working.")
@@ -800,3 +803,4 @@ if __name__ == "__main__":
 
     print(f"\nGovernor assessment log contains {len(governor.assessment_log)} entries.")
     print("System test complete. Check 'system_base_state.json' for final saved memory.")
+
