@@ -12,6 +12,9 @@ package.domain = com.sunni
 # (str) Source code where the main.py live
 source.dir = .
 
+# (str) Application versioning (method 1)
+version = 1.0.0
+
 # (list) Source files to include (let buildozer auto-detect, but we're explicit)
 source.include_exts = py,png,jpg,kv,atlas,json
 
@@ -26,7 +29,7 @@ source.exclude_dirs = tests, bin, venv, __pycache__, .git, .github
 
 # (list) Application requirements
 # Note: NO numpy, NO cryptography - pure Python only!
-requirements = python3,kivy
+requirements = python3,kivy==2.3.0
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -57,7 +60,7 @@ android.minapi = 21
 android.sdk = 33
 
 # (str) Android NDK version to use
-android.ndk = 
+android.ndk = 25b
 
 # (bool) Use --private data storage (True) or --dir (False)
 android.private_storage = True
