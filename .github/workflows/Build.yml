@@ -26,6 +26,17 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
     
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space-action@v1.3.1
+      with:
+        tool-cache: true
+        android: false
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -50,7 +61,7 @@ jobs:
     - name: Install Cython and buildozer
       run: |
         pip3 install --upgrade pip
-        pip3 install --upgrade cython==0.29.36
+        pip3 install --upgrade cython==3.0.0
         pip3 install --upgrade buildozer
     
     - name: Build with buildozer
