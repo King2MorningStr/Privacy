@@ -79,7 +79,14 @@ try:
     
     # Memory layer
     print("  → Memory layer processing...")
-    parent_node = memory_governor.ingest_data(test_data)
+    # ingest_data returns None now (recursive)
+    memory_governor.ingest_data(test_data)
+
+    # Manually fetch the node to verify it exists
+    parent_id = memory_system.find_node_id_by_concept("TEST_CONVERSATION")
+    if not parent_id:
+        raise Exception("Parent node was not found after ingest!")
+    parent_node = memory_system.get_node(parent_id)
     print(f"  ✓ Created node: {parent_node.id}")
     
     # Processing layer
