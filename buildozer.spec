@@ -26,7 +26,7 @@ source.exclude_dirs = tests, bin, venv, __pycache__, .git, .github
 
 # (list) Application requirements
 # Note: NO numpy, NO cryptography - pure Python only!
-requirements = python3,kivy==2.3.0
+requirements = python3,kivy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -57,7 +57,7 @@ android.minapi = 21
 android.sdk = 33
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 
 
 # (bool) Use --private data storage (True) or --dir (False)
 android.private_storage = True
