@@ -47,9 +47,6 @@ fullscreen = 0
 # (list) Permissions
 android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
-# (list) Android permissions to request
-android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
-
 # (int) Target Android API, should be as high as possible.
 android.api = 33
 
