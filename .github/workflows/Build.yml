@@ -88,5 +88,4 @@ jobs:
       with:
         files: bin/*.apk
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        docker-images: true
-        swap-storage: true
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
