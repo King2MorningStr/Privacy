@@ -29,12 +29,7 @@ jobs:
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
       with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
         tool-cache: false
-        
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
         android: true
         dotnet: true
         haskell: true
@@ -45,7 +40,11 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \ autoconf automake libtool pkg-config
+        sudo apt-get install -y \
+          autoconf \
+          automake \
+          libtool \
+          pkg-config \
           python3-pip \
           build-essential \
           git \
