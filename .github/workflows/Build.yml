@@ -68,7 +68,7 @@ jobs:
         pip3 install --upgrade pip
         pip3 install cython==3.0.0
         pip3 install buildozer
-        pip3 install python-for-android==2023.12.19
+        pip3 install python-for-android==2024.1.21
   
     - name: Build with Buildozer (libffi autoreconf disabled)
       run: |
