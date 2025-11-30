@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / Build
+build/
+dist/
+*.egg-info/
+.briefcase/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Runtime data
+system_live.deltalog
+system_base_state.tmp
+# We don't ignore system_base_state.json generally if it's the seed file,
+# but we might ignore it if it's the local runtime copy.
+# For now, we keep the source one tracked.

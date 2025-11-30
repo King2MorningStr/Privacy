@@ -23,13 +23,13 @@ import json
 import os
 
 # Import Trinity system
-from dimensional_memory_constant_standalone_demo import (
+from dimensional_cortex.dimensional_memory_constant_standalone_demo import (
     start_memory_system, stop_memory_system
 )
-from dimensional_processing_system_standalone_demo import (
+from dimensional_cortex.dimensional_processing_system_standalone_demo import (
     CrystalMemorySystem, GovernanceEngine
 )
-from dimensional_energy_regulator_mobile import DimensionalEnergyRegulator
+from dimensional_cortex.dimensional_energy_regulator_mobile import DimensionalEnergyRegulator
 
 # ============================================================================
 # THEME COLORS - Neon Dark Cyber
