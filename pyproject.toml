@@ -1,0 +1,45 @@
+[tool.briefcase]
+project_name = "Dimensional Cortex"
+bundle = "com.dimensionalcortex"
+version = "0.1.0"
+url = "https://github.com/SunniTheAIGenerator/dimensional-cortex"
+license = "MIT"
+author = "Sunni"
+author_email = "sunni@example.com"
+
+[tool.briefcase.app.dimensional_cortex]
+formal_name = "Dimensional Cortex"
+description = "Universal AI Continuity Engine"
+long_description = "Universal AI Continuity Engine with Dimensional Processing"
+sources = ["src/dimensional_cortex"]
+requires = [
+    "kivy==2.3.0",
+    "pillow",
+    "platformdirs",
+]
+
+[tool.briefcase.app.dimensional_cortex.macOS]
+requires = [
+    "std-nslog",
+]
+
+[tool.briefcase.app.dimensional_cortex.linux]
+requires = [
+]
+
+[tool.briefcase.app.dimensional_cortex.windows]
+requires = [
+]
+
+# Mobile deployments
+[tool.briefcase.app.dimensional_cortex.iOS]
+requires = [
+    "std-nslog",
+]
+
+[tool.briefcase.app.dimensional_cortex.android]
+requires = [
+    "android_gradle_plugin==8.2.0"
+]
+
+base_theme = "MainTheme"
