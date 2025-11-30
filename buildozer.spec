@@ -29,7 +29,7 @@ source.exclude_dirs = tests, bin, venv, __pycache__, .git, .github
 
 # (list) Application requirements
 # Note: NO numpy, NO cryptography - pure Python only!
-requirements = python3,kivy==2.3.0
+requirements = python3, kivy==2.3.0, pillow
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
