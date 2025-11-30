@@ -10,21 +10,15 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
 
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
@@ -36,7 +30,7 @@ jobs:
         large-packages: true
         docker-images: true
         swap-storage: true
-    
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -61,19 +55,33 @@ jobs:
           zlib1g-dev \
           libgstreamer1.0-dev \
           gstreamer1.0-plugins-base \
-          gstreamer1.0-plugins-good
+          gstreamer1.0-plugins-good \
+          libffi-dev \
+          libssl-dev \
+          libbz2-dev \
+          libsqlite3-dev \
+          libncurses5-dev \
+          libncursesw5-dev \
+          libreadline-dev \
+          libgdbm-dev \
+          libgdbm-compat-dev \
+          liblzma-dev \
+          libexpat1-dev \
+          tk-dev \
+          uuid-dev
 
-    - name: Install Buildozer & Python-for-Android
+    - name: Install Buildozer, python-for-android, Cython
       run: |
-        pip3 install --upgrade pip
-        pip3 install cython==3.0.0
-        pip3 install buildozer==1.5.0
-        pip3 install python-for-android==2024.1.21
+        python -m pip install --upgrade pip
+        # Cython 0.29.x is what p4a + Kivy expect, 3.x causes build failures
+        python -m pip install "Cython==0.29.36"
+        # Explicitly pin python-for-android to the version you're using
+        python -m pip install "python-for-android==2024.1.21"
+        # Latest stable Buildozer
+        python -m pip install "buildozer"
 
-    - name: Build with Buildozer (libffi autoreconf disabled)
+    - name: Build with Buildozer
       run: |
-        export LIBFFI_AUTOUPDATE=no
-        echo ">>> Disabled libffi autoreconf to avoid LT_SYS_SYMBOL_USCORE crash"
         buildozer -v android debug
 
     - name: Upload APK artifact
