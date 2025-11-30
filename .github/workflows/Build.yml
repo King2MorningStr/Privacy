@@ -36,7 +36,7 @@ jobs:
         large-packages: true
         docker-images: true
         swap-storage: true
-
+    
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -67,13 +67,13 @@ jobs:
       run: |
         pip3 install --upgrade pip
         pip3 install cython==3.0.0
-        pip3 install buildozer
+        pip3 install buildozer==1.5.0
         pip3 install python-for-android==2024.1.21
-  
+
     - name: Build with Buildozer (libffi autoreconf disabled)
       run: |
         export LIBFFI_AUTOUPDATE=no
-        echo ">>> Disabled libffi autoreconf to avoid autoconf LT_SYS_SYMBOL_USCORE crash"
+        echo ">>> Disabled libffi autoreconf to avoid LT_SYS_SYMBOL_USCORE crash"
         buildozer -v android debug
 
     - name: Upload APK artifact
